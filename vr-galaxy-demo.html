@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>VR Galaxy Voyage – เดโม</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1026;--card:#172554;--tx:#eff6ff;--mu:#93c5fd;--ac:#60a5fa;--ok:#34d399;--bad:#fca5a5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Noto Sans Thai',Tahoma,sans-serif;line-height:1.6}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:16px}
+h1{margin:0;font-size:24px}p{margin:0}
+.sub,.hint{color:var(--mu);font-size:14px}
+canvas{width:100%;height:auto;aspect-ratio:4/3;background:#02040d;border-radius:16px;touch-action:none;cursor:grab}
+button{font:inherit;min-height:44px;padding:8px 16px;border-radius:99px;border:2px solid var(--ac);background:transparent;color:var(--tx);cursor:pointer}
+button[aria-pressed=true]{background:var(--ac);color:#0b1026;font-weight:700}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:var(--card);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px}
+.card h2{margin:0;font-size:18px;color:var(--mu)}
+.opt{width:100%;text-align:left;border-radius:10px}
+.opt.ok{background:var(--ok);color:#022c22;border-color:var(--ok)}
+.opt.bad{background:var(--bad);color:#450a0a;border-color:var(--bad)}
+</style>
+</head>
+<body>
+<main>
+<div><h1>VR Galaxy Voyage</h1><p class="sub">เดโมท่องกาแล็กซีทางช้างเผือก ลากเพื่อมองรอบทิศ</p></div>
+<canvas id="c" width="640" height="480" aria-label="กาแล็กซีรูปกังหัน ลากเพื่อหมุนมุมมอง"></canvas>
+<p class="hint">ลากนิ้วหรือเมาส์เพื่อเปลี่ยนมุมมอง</p>
+<div class="row" id="tabs" role="group" aria-label="จุดสำรวจ"></div>
+<div class="card"><h2 id="nm"></h2><p id="info"></p></div>
+<div class="card"><h2>ทดสอบความรู้</h2><p>ระบบสุริยะของเราอยู่ในกาแล็กซีใด?</p><div id="q" style="display:flex;flex-direction:column;gap:8px"></div><p id="res" class="hint" aria-live="polite"></p></div>
+</main>
+<script>
+var cv=document.getElementById('c'),x=cv.getContext('2d'),W=cv.width,H=cv.height,yaw=0,pit=0.9,drag=null,S=[];
+function rnd(i){var v=Math.sin(i*127.1)*43758.5453;return v-Math.floor(v)}
+for(var i=0;i<1600;i++){var arm=i%2,t=rnd(i)*3.2+0.2,a=t*2.4+arm*Math.PI+(rnd(i+5)-.5)*0.5,r=t*90;S.push([Math.cos(a)*r,(rnd(i+9)-.5)*14*(1/(t+.5)),Math.sin(a)*r,t])}
+for(var j=0;j<300;j++){var a2=rnd(j+3000)*6.28,r2=rnd(j+4000)*45;S.push([Math.cos(a2)*r2,(rnd(j+5000)-.5)*20,Math.sin(a2)*r2,0.1])}
+function draw(){x.clearRect(0,0,W,H);var cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pit),sp=Math.sin(pit);
+S.forEach(function(s){var X=s[0]*cy-s[2]*sy,Z=s[0]*sy+s[2]*cy,Y=s[1]*cp-Z*sp,D=s[1]*sp+Z*cp;var k=1.2+D/600,px=W/2+X*k*1.1,py=H/2+Y*k*1.1;
+x.fillStyle=s[3]<0.6?'#fde68a':(s[3]<1.8?'#bfdbfe':'#93c5fd');x.globalAlpha=0.5+0.5*Math.min(1,k/1.5);x.fillRect(px,py,k*1.6,k*1.6)});
+x.globalAlpha=1;
+var sx=W/2+(Math.cos(0.9)*0+ (70*cy-90*sy)*1.2*1.1),sz=70*sy+90*cy,syy=(0*cp-sz*sp),k2=1.2+(0*sp+sz*cp)/600;
+x.fillStyle='#fb923c';x.beginPath();x.arc(W/2+(70*cy-90*sy)*k2*1.1,H/2+syy*k2*1.1,5,0,7);x.fill();
+x.fillStyle='#fff';x.font='14px sans-serif';x.fillText('ระบบสุริยะ',W/2+(70*cy-90*sy)*k2*1.1+9,H/2+syy*k2*1.1+4)}
+var T=[['ใจกลางกาแล็กซี','บริเวณใจกลางหนาแน่นด้วยดาวฤกษ์เก่าแก่ และมีหลุมดำมวลยิ่งยวดอยู่ตรงกลาง'],['แขนกังหัน','ดาวฤกษ์และก๊าซเรียงตัวเป็นแขนโค้ง เป็นแหล่งกำเนิดดาวดวงใหม่'],['ตำแหน่งของเรา','ระบบสุริยะอยู่ในแขนกังหันขนาดเล็ก ห่างจากใจกลางประมาณ 26,000 ปีแสง'],['ขนาดและจำนวนดาว','ทางช้างเผือกมีดาวฤกษ์หลายแสนล้านดวง และกว้างราว 100,000 ปีแสง']];
+function pick(i){[].forEach.call(document.querySelectorAll('#tabs button'),function(b,j){b.setAttribute('aria-pressed',j==i)});document.getElementById('nm').textContent=T[i][0];document.getElementById('info').textContent=T[i][1]}
+T.forEach(function(t,i){var b=document.createElement('button');b.textContent=t[0];b.onclick=function(){pick(i)};document.getElementById('tabs').appendChild(b)});
+cv.onpointerdown=function(e){drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=function(e){if(drag){yaw+=(e.clientX-drag[0])*0.01;pit=Math.max(0.2,Math.min(1.5,pit+(e.clientY-drag[1])*0.008));drag=[e.clientX,e.clientY];draw()}};
+cv.onpointerup=function(){drag=null};
+[['ก. ทางช้างเผือก',1],['ข. แอนดรอเมดา',0]].forEach(function(o){var b=document.createElement('button');b.className='opt';b.textContent=o[0];b.onclick=function(){b.classList.add(o[1]?'ok':'bad');document.getElementById('res').textContent=o[1]?'ถูกต้อง! เราอยู่ในกาแล็กซีทางช้างเผือก':'ยังไม่ใช่ ลองอีกครั้ง'};document.getElementById('q').appendChild(b)});
+try{pick(0);draw()}catch(e){}
+</script>
+</body>
+</html>
